@@ -38,7 +38,7 @@ func main() {
     iter.Take(2) // get just the first 2 elements
 
     numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-    new := iter.Apply(numbers) // []int{16, 18}
+    new := iter.Apply(numbers) // []int{12, 16}
 }
 ```
 
