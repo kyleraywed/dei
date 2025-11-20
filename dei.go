@@ -100,20 +100,21 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 		case "map":
 			instruct := iter.mapInstruct[order.index]
+			// no temp slice necessary
 			for i := range workingSlice {
 				workingSlice[i] = instruct(workingSlice[i])
 			}
 
 		case "take":
-			index := iter.takeIndexes[order.index]
+			takeIndex := iter.takeIndexes[order.index]
 
-			if index > len(workingSlice)-1 {
-				log.Printf("index %v out of range, skipping order...", index)
+			if takeIndex > len(workingSlice)-1 {
+				log.Printf("index %v out of range, skipping order...", takeIndex)
 				continue
 			}
 
 			tempSlice := make([]T, 0, len(workingSlice))
-			for idx := 0; idx <= index; idx++ {
+			for idx := 0; idx <= takeIndex; idx++ {
 				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
