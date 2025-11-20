@@ -80,63 +80,63 @@ func (iter *Dei[T]) Skip(n int) {
 }
 
 // Interpret orders on data. Return new slice.
-func (iter *Dei[T]) Apply(in []T) []T {
-	out := in
+func (iter *Dei[T]) Apply(input []T) []T {
+	workingSlice := input
 
 	for _, order := range iter.orders {
 		switch order.adapter {
 
 		case "filter":
-			new := make([]T, 0, len(out))
+			tempSlice := make([]T, 0, len(workingSlice))
 			instruct := iter.filterInstruct[order.index]
 
-			for _, val := range out {
+			for _, val := range workingSlice {
 				if instruct(val) {
-					new = append(new, val)
+					tempSlice = append(tempSlice, val)
 				}
 			}
 
-			out = new
+			workingSlice = tempSlice
 
 		case "map":
 			instruct := iter.mapInstruct[order.index]
-			for i := range out {
-				out[i] = instruct(out[i])
+			for i := range workingSlice {
+				workingSlice[i] = instruct(workingSlice[i])
 			}
 
 		case "take":
 			index := iter.takeIndexes[order.index]
 
-			if index > len(out)-1 {
+			if index > len(workingSlice)-1 {
 				log.Printf("index %v out of range, skipping order...", index)
 				continue
 			}
 
-			new := make([]T, 0, len(out))
+			tempSlice := make([]T, 0, len(workingSlice))
 			for idx := 0; idx <= index; idx++ {
-				new = append(new, out[idx])
+				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
-			out = new
+			workingSlice = tempSlice
 
 		case "skip":
-			index := iter.skipIndexes[order.index]
+			skipIndex := iter.skipIndexes[order.index]
 
-			if index > len(out)-1 {
-				log.Printf("index %v out of range. skipping order...", index)
+			if skipIndex > len(workingSlice)-1 {
+				log.Printf("index %v out of range. skipping order...", skipIndex)
 				continue
 			}
 
-			new := make([]T, 0, len(out)-(index-1))
-			for idx := index + 1; idx < len(out); idx++ {
-				new = append(new, out[idx])
+			tempSlice := make([]T, 0, len(workingSlice)-(skipIndex-1))
+			for idx := skipIndex + 1; idx < len(workingSlice); idx++ {
+				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
-			out = new
+			workingSlice = tempSlice
 		}
 	}
 
-	return out
+	return workingSlice
 }
 
 func (iter Dei[T]) String() string {
