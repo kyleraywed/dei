@@ -21,7 +21,7 @@ func TestFilter(t *testing.T) {
 
 	for idx, val := range expected {
 		if gotten[idx] != val {
-			t.Error("Filter value mismatch")
+			t.Errorf("Filter value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
 	}
 }
@@ -43,7 +43,7 @@ func TestMap(t *testing.T) {
 
 	for idx, val := range expected {
 		if gotten[idx] != val {
-			t.Error("Map value mismatch")
+			t.Errorf("Map value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
 	}
 }
@@ -133,13 +133,13 @@ func TestOrder(t *testing.T) {
 
 	for idx, val := range expected {
 		if iter.orders[idx].adapter != val.adapter {
-			t.Error("Order adapter mismatch")
+			t.Errorf("Order adapter mismatch.\nExpected [%v] Got: [%v]\n", val.adapter, iter.orders[idx].adapter)
 		}
 		if iter.orders[idx].index != val.index {
-			t.Error("Order index mismatch")
+			t.Errorf("Order index mismatch.\nExpected [%v] Got: [%v]\n", val.index, iter.orders[idx].index)
 		}
 		if iter.orders[idx].comments[0] != val.comments[0] {
-			t.Error("Order comment mismatch")
+			t.Errorf("Order comment mismatch.\nExpected [%v] Got: [%v]\n", val.comments, iter.orders[idx].comments[0])
 		}
 	}
 

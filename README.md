@@ -27,7 +27,7 @@ func main() {
         return value % 2 == 0
     }, "Get just the evens")
 
-    iter.Map(func(value int) {
+    iter.Map(func(value int) int {
         return value * 2
     }, "Double them")
 
