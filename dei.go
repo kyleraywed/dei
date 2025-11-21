@@ -19,7 +19,7 @@ type Dei[T any] struct {
 	}
 }
 
-// Keeps only the elements where in returns true. Optional comment strings.
+// Keep only the elements where in returns true. Optional comment strings.
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 	iter.filterInstruct = append(iter.filterInstruct, in)
 	iter.orders = append(iter.orders, struct {
@@ -31,7 +31,7 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 	})
 }
 
-// Transforms each element by applying a function. Optional comment strings.
+// Transform each element by applying a function. Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	iter.mapInstruct = append(iter.mapInstruct, in)
 	iter.orders = append(iter.orders, struct {
@@ -43,7 +43,7 @@ func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	})
 }
 
-// Yields only the first n items from the iterator. Comments inferred.
+// Yield only the first n items from the iterator. Comments inferred.
 func (iter *Dei[T]) Take(n int) {
 	if n < 1 {
 		log.Printf("Take(%v): No order submitted.", n)
@@ -61,7 +61,7 @@ func (iter *Dei[T]) Take(n int) {
 	})
 }
 
-// Skips the first n items and yields the rest. Comments inferred.
+// Skip the first n items and yields the rest. Comments inferred.
 func (iter *Dei[T]) Skip(n int) {
 	if n < 1 {
 		log.Printf("Skip(%v): No order submitted.", n)
