@@ -1,6 +1,6 @@
 # DEI
 
-An "easy enough" **d**eferred-**e**xecution **i**terator library.
+A bare-bones **d**eferred-**e**xecution **i**terator library.
 
 ```go
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
