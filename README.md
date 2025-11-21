@@ -1,4 +1,4 @@
-# Dei
+# DEI
 
 An "easy enough" **d**eferred-**e**xecution **i**terator library.
 
