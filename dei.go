@@ -7,33 +7,33 @@ import (
 )
 
 type order struct {
-	adapter  string
+	method   string
 	index    int
 	comments []string
 }
 
 type Dei[T any] struct {
-	filterInstruct []func(t T) bool
-	mapInstruct    []func(t T) T
-	takeIndexes    []int
-	skipIndexes    []int
+	filters     []func(t T) bool
+	mappers     []func(t T) T
+	takeIndexes []int
+	skipIndexes []int
 
 	orders []order
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
-	iter.filterInstruct = append(iter.filterInstruct, in)
+	iter.filters = append(iter.filters, in)
 	iter.orders = append(iter.orders, order{
-		adapter: "filter", index: len(iter.filterInstruct) - 1, comments: comments,
+		method: "filter", index: len(iter.filters) - 1, comments: comments,
 	})
 }
 
 // Transform each element by applying a function. Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
-	iter.mapInstruct = append(iter.mapInstruct, in)
+	iter.mappers = append(iter.mappers, in)
 	iter.orders = append(iter.orders, order{
-		adapter: "map", index: len(iter.mapInstruct) - 1, comments: comments,
+		method: "map", index: len(iter.mappers) - 1, comments: comments,
 	})
 }
 
@@ -44,10 +44,10 @@ func (iter *Dei[T]) Take(n int) {
 		return
 	}
 
-	iter.takeIndexes = append(iter.takeIndexes, n-1)
+	iter.takeIndexes = append(iter.takeIndexes, n)
 
 	iter.orders = append(iter.orders, order{
-		adapter: "take", index: len(iter.takeIndexes) - 1, comments: []string{strconv.Itoa(n)},
+		method: "take", index: len(iter.takeIndexes) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
@@ -58,10 +58,10 @@ func (iter *Dei[T]) Skip(n int) {
 		return
 	}
 
-	iter.skipIndexes = append(iter.skipIndexes, n-1)
+	iter.skipIndexes = append(iter.skipIndexes, n)
 
 	iter.orders = append(iter.orders, order{
-		adapter: "skip", index: len(iter.skipIndexes) - 1, comments: []string{strconv.Itoa(n)},
+		method: "skip", index: len(iter.skipIndexes) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
@@ -70,11 +70,11 @@ func (iter *Dei[T]) Apply(input []T) []T {
 	workingSlice := input
 
 	for _, order := range iter.orders {
-		switch order.adapter {
+		switch order.method {
 
 		case "filter":
 			tempSlice := make([]T, 0, len(workingSlice))
-			instruct := iter.filterInstruct[order.index]
+			instruct := iter.filters[order.index]
 
 			for _, val := range workingSlice {
 				if instruct(val) {
@@ -85,14 +85,14 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			workingSlice = tempSlice
 
 		case "map":
-			instruct := iter.mapInstruct[order.index]
+			instruct := iter.mappers[order.index]
 			// no temp slice necessary
 			for i := range workingSlice {
 				workingSlice[i] = instruct(workingSlice[i])
 			}
 
 		case "take":
-			takeIndex := iter.takeIndexes[order.index]
+			takeIndex := iter.takeIndexes[order.index] - 1
 
 			if takeIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range, skipping order...", takeIndex)
@@ -107,7 +107,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			workingSlice = tempSlice
 
 		case "skip":
-			skipIndex := iter.skipIndexes[order.index]
+			skipIndex := iter.skipIndexes[order.index] - 1
 
 			if skipIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range. skipping order...", skipIndex)
@@ -129,13 +129,13 @@ func (iter *Dei[T]) Apply(input []T) []T {
 func (iter Dei[T]) String() string {
 	out := fmt.Sprintf(
 		"Filter instruction addresses:\n\t%v\nMap instruction addresses:\n\t%v\n\n",
-		iter.filterInstruct, iter.mapInstruct,
+		iter.filters, iter.mappers,
 	)
 
 	for idx, val := range iter.orders {
 		out += fmt.Sprintf(
 			"Order %v:\n\tAdapter: %v\n\tIndex: %v\n\tComments %v\n",
-			idx+1, val.adapter, val.index, val.comments,
+			idx+1, val.method, val.index, val.comments,
 		)
 	}
 

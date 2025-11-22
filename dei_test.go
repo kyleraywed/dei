@@ -1,6 +1,7 @@
 package dei
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -132,8 +133,8 @@ func TestOrder(t *testing.T) {
 	}
 
 	for idx, val := range expected {
-		if iter.orders[idx].adapter != val.adapter {
-			t.Errorf("Order adapter mismatch.\nExpected [%v] Got: [%v]\n", val.adapter, iter.orders[idx].adapter)
+		if iter.orders[idx].method != val.adapter {
+			t.Errorf("Order adapter mismatch.\nExpected [%v] Got: [%v]\n", val.adapter, iter.orders[idx].method)
 		}
 		if iter.orders[idx].index != val.index {
 			t.Errorf("Order index mismatch.\nExpected [%v] Got: [%v]\n", val.index, iter.orders[idx].index)
@@ -143,5 +144,5 @@ func TestOrder(t *testing.T) {
 		}
 	}
 
-	//fmt.Println(iter)
+	fmt.Println(iter)
 }
