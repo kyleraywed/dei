@@ -38,8 +38,7 @@ func main() {
         return value % 2 == 0
     }, "Get just the evens")
 
-    // Second. Also notice the optional comment.
-    // This can be viewed by fmt.Printing iter here.
+    // Second. Also notice the optional comment. These can be viewed via String()
     iter.Map(func(value int) int {
         return value * 2
     }, "Double them")
