@@ -127,10 +127,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 }
 
 func (iter Dei[T]) String() string {
-	out := fmt.Sprintf(
-		"Filter instruction addresses:\n\t%v\nMap instruction addresses:\n\t%v\n\n",
-		iter.filters, iter.mappers,
-	)
+	var out string
 
 	for idx, val := range iter.orders {
 		out += fmt.Sprintf(
