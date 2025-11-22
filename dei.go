@@ -92,30 +92,30 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			}
 
 		case "take":
-			takeIndex := iter.takeCounts[order.index] - 1
+			takeUntilIndex := iter.takeCounts[order.index] - 1
 
-			if takeIndex > len(workingSlice)-1 {
-				log.Printf("index %v out of range, skipping order...", takeIndex)
+			if takeUntilIndex > len(workingSlice)-1 {
+				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
 				continue
 			}
 
 			tempSlice := make([]T, 0, len(workingSlice))
-			for idx := 0; idx <= takeIndex; idx++ {
+			for idx := 0; idx <= takeUntilIndex; idx++ {
 				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
 			workingSlice = tempSlice
 
 		case "skip":
-			skipIndex := iter.skipCounts[order.index] - 1
+			skipUntilIndex := iter.skipCounts[order.index] - 1
 
-			if skipIndex > len(workingSlice)-1 {
-				log.Printf("index %v out of range. skipping order...", skipIndex)
+			if skipUntilIndex > len(workingSlice)-1 {
+				log.Printf("index %v out of range. skipping order...", skipUntilIndex)
 				continue
 			}
 
-			tempSlice := make([]T, 0, len(workingSlice)-(skipIndex-1))
-			for idx := skipIndex + 1; idx < len(workingSlice); idx++ {
+			tempSlice := make([]T, 0, len(workingSlice)-(skipUntilIndex-1))
+			for idx := skipUntilIndex + 1; idx < len(workingSlice); idx++ {
 				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
