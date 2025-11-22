@@ -13,10 +13,10 @@ type order struct {
 }
 
 type Dei[T any] struct {
-	filters     []func(t T) bool
-	mappers     []func(t T) T
-	takeIndexes []int
-	skipIndexes []int
+	filters    []func(t T) bool
+	mappers    []func(t T) T
+	takeCounts []int
+	skipCounts []int
 
 	orders []order
 }
@@ -44,10 +44,10 @@ func (iter *Dei[T]) Take(n int) {
 		return
 	}
 
-	iter.takeIndexes = append(iter.takeIndexes, n)
+	iter.takeCounts = append(iter.takeCounts, n)
 
 	iter.orders = append(iter.orders, order{
-		method: "take", index: len(iter.takeIndexes) - 1, comments: []string{strconv.Itoa(n)},
+		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
@@ -58,10 +58,10 @@ func (iter *Dei[T]) Skip(n int) {
 		return
 	}
 
-	iter.skipIndexes = append(iter.skipIndexes, n)
+	iter.skipCounts = append(iter.skipCounts, n)
 
 	iter.orders = append(iter.orders, order{
-		method: "skip", index: len(iter.skipIndexes) - 1, comments: []string{strconv.Itoa(n)},
+		method: "skip", index: len(iter.skipCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
@@ -92,7 +92,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			}
 
 		case "take":
-			takeIndex := iter.takeIndexes[order.index] - 1
+			takeIndex := iter.takeCounts[order.index] - 1
 
 			if takeIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range, skipping order...", takeIndex)
@@ -107,7 +107,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			workingSlice = tempSlice
 
 		case "skip":
-			skipIndex := iter.skipIndexes[order.index] - 1
+			skipIndex := iter.skipCounts[order.index] - 1
 
 			if skipIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range. skipping order...", skipIndex)
