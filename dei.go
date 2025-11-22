@@ -6,27 +6,25 @@ import (
 	"strconv"
 )
 
+type order struct {
+	adapter  string
+	index    int
+	comments []string
+}
+
 type Dei[T any] struct {
 	filterInstruct []func(t T) bool
 	mapInstruct    []func(t T) T
 	takeIndexes    []int
 	skipIndexes    []int
 
-	orders []struct {
-		adapter  string   // filter, map, etc
-		index    int      // the index of the slice in which the instruct or index needed is held
-		comments []string // for debug printing
-	}
+	orders []order
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 	iter.filterInstruct = append(iter.filterInstruct, in)
-	iter.orders = append(iter.orders, struct {
-		adapter  string
-		index    int
-		comments []string
-	}{
+	iter.orders = append(iter.orders, order{
 		adapter: "filter", index: len(iter.filterInstruct) - 1, comments: comments,
 	})
 }
@@ -34,11 +32,7 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 // Transform each element by applying a function. Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	iter.mapInstruct = append(iter.mapInstruct, in)
-	iter.orders = append(iter.orders, struct {
-		adapter  string
-		index    int
-		comments []string
-	}{
+	iter.orders = append(iter.orders, order{
 		adapter: "map", index: len(iter.mapInstruct) - 1, comments: comments,
 	})
 }
@@ -52,11 +46,7 @@ func (iter *Dei[T]) Take(n int) {
 
 	iter.takeIndexes = append(iter.takeIndexes, n-1)
 
-	iter.orders = append(iter.orders, struct {
-		adapter  string
-		index    int
-		comments []string
-	}{
+	iter.orders = append(iter.orders, order{
 		adapter: "take", index: len(iter.takeIndexes) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
@@ -70,11 +60,7 @@ func (iter *Dei[T]) Skip(n int) {
 
 	iter.skipIndexes = append(iter.skipIndexes, n-1)
 
-	iter.orders = append(iter.orders, struct {
-		adapter  string
-		index    int
-		comments []string
-	}{
+	iter.orders = append(iter.orders, order{
 		adapter: "skip", index: len(iter.skipIndexes) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
