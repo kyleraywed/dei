@@ -1,3 +1,8 @@
+/*
+	todo:
+		- within Apply(), split large slices into concurrent workloads.
+*/
+
 package dei
 
 import (
