@@ -80,7 +80,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 		switch order.method {
 
 		case "filter":
-			instruct := iter.filters[order.index]
+			workOrder := iter.filters[order.index]
 			numWorkers := runtime.NumCPU()
 
 			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
@@ -109,7 +109,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 					out := make([]T, 0, len(chunk))
 					for _, v := range chunk {
-						if instruct(v) {
+						if workOrder(v) {
 							out = append(out, v)
 						}
 					}
@@ -128,7 +128,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			workingSlice = tempSlice
 
 		case "map":
-			instruct := iter.mappers[order.index]
+			workOrder := iter.mappers[order.index]
 			numWorkers := runtime.NumCPU()
 
 			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
@@ -154,7 +154,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 				go func() {
 					defer wg.Done()
 					for i := range chunk {
-						chunk[i] = instruct(chunk[i])
+						chunk[i] = workOrder(chunk[i])
 					}
 				}()
 			}
