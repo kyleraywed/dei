@@ -90,7 +90,6 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			wg.Add(numWorkers)
 
 			for idx := range numWorkers {
-				idx := idx
 				start := idx * chunkSize
 
 				if start >= len(workingSlice) {
@@ -130,10 +129,37 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 		case "map":
 			instruct := iter.mappers[order.index]
-			// no temp slice necessary
-			for i := range workingSlice {
-				workingSlice[i] = instruct(workingSlice[i])
+			numWorkers := runtime.NumCPU()
+
+			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
+
+			var wg sync.WaitGroup
+			wg.Add(numWorkers)
+
+			for idx := range numWorkers {
+				start := idx * chunkSize
+
+				if start >= len(workingSlice) {
+					wg.Done()
+					continue
+				}
+
+				end := start + chunkSize
+				if end > len(workingSlice) {
+					end = len(workingSlice)
+				}
+
+				chunk := workingSlice[start:end]
+
+				go func() {
+					defer wg.Done()
+					for i := range chunk {
+						chunk[i] = instruct(chunk[i])
+					}
+				}()
 			}
+
+			wg.Wait()
 
 		case "take":
 			takeUntilIndex := iter.takeCounts[order.index] - 1
