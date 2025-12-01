@@ -8,7 +8,9 @@ package dei
 import (
 	"fmt"
 	"log"
+	"runtime"
 	"strconv"
+	"sync"
 )
 
 type order struct {
@@ -78,13 +80,50 @@ func (iter *Dei[T]) Apply(input []T) []T {
 		switch order.method {
 
 		case "filter":
-			tempSlice := make([]T, 0, len(workingSlice))
 			instruct := iter.filters[order.index]
+			numWorkers := runtime.NumCPU()
 
-			for _, val := range workingSlice {
-				if instruct(val) {
-					tempSlice = append(tempSlice, val)
+			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
+			results := make([][]T, numWorkers)
+
+			var wg sync.WaitGroup
+			wg.Add(numWorkers)
+
+			for idx := range numWorkers {
+				idx := idx
+				start := idx * chunkSize
+
+				if start >= len(workingSlice) {
+					wg.Done()
+					continue
 				}
+
+				end := start + chunkSize
+				if end > len(workingSlice) {
+					end = len(workingSlice)
+				}
+
+				chunk := workingSlice[start:end]
+
+				go func() {
+					defer wg.Done()
+
+					out := make([]T, 0, len(chunk))
+					for _, v := range chunk {
+						if instruct(v) {
+							out = append(out, v)
+						}
+					}
+					results[idx] = out
+				}()
+			}
+
+			wg.Wait()
+
+			// Flatten
+			tempSlice := make([]T, 0, len(workingSlice))
+			for _, r := range results {
+				tempSlice = append(tempSlice, r...)
 			}
 
 			workingSlice = tempSlice
