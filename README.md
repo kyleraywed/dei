@@ -9,9 +9,6 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
 // Transform each element by applying a function. Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
 
-// Yield only the first n items from the iterator. Comments inferred.
-func (iter *Dei[T]) Take(n int)
-
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guarenteed.
@@ -19,6 +16,9 @@ func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.
 func (iter *Dei[T]) Skip(n int)
+
+// Yield only the first n items from the iterator. Comments inferred.
+func (iter *Dei[T]) Take(n int)
 
 // Interpret orders on data. Return new slice.
 func (iter *Dei[T]) Apply(input []T) []T
