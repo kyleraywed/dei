@@ -164,12 +164,10 @@ func (iter *Dei[T]) Apply(input []T) []T {
 				continue
 			}
 
-			tempSlice := make([]T, 0, len(workingSlice))
-			for idx := 0; idx <= takeUntilIndex; idx++ {
-				tempSlice = append(tempSlice, workingSlice[idx])
-			}
+			/* tempSlice := make([]T, 0, len(workingSlice))
+			tempSlice = workingSlice[:takeUntilIndex+1] */
 
-			workingSlice = tempSlice
+			workingSlice = workingSlice[:takeUntilIndex+1]
 
 		case "skip":
 			skipUntilIndex := iter.skipCounts[order.index] - 1
