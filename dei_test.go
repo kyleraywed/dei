@@ -120,7 +120,7 @@ func TestForeachFast(t *testing.T) {
 
 	var mu sync.Mutex
 
-	iter.Foreach(func(value int) {
+	iter.Foreach(func(value int) { // Don't do this in production, kids.
 		mu.Lock()
 		gotten = append(gotten, strconv.Itoa(value))
 		mu.Unlock()

@@ -3,7 +3,7 @@
 A bare-bones **d**eferred-**e**xecution **i**terator library.
 
 ```go
-// Keeps only the elements where in returns true. Optional comment strings.
+// Keep only the elements where in returns true. Optional comment strings.
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
 
 // Transform each element by applying a function. Optional comment strings.
@@ -11,6 +11,11 @@ func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
 
 // Yield only the first n items from the iterator. Comments inferred.
 func (iter *Dei[T]) Take(n int)
+
+// Perform logic using each element as an input. No changes to the underlying elements are made.
+// Set the first optional comment to "fast" for concurrent execution of input functions.
+// Not super safe.
+func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.
 func (iter *Dei[T]) Skip(n int)
@@ -49,10 +54,17 @@ func main() {
         return value > 10
     })
 
+    // Fourth. 
+    iter.Foreach(func(value int) { // print the values
+        fmt.Println(value)
+    })
+
     // Last. Take and skip still log inferred comments.
     iter.Take(2) // get just the first 2 elements
 
     numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-    new := iter.Apply(numbers) // []int{12, 16}
+    output := iter.Apply(numbers) // []int{12, 16}
+    // [12, 16, 20] will print when Apply is run since
+    // Foreach() was called before Take()
 }
 ```
