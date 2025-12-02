@@ -124,7 +124,7 @@ func TestForeachFast(t *testing.T) {
 		mu.Lock()
 		gotten = append(gotten, strconv.Itoa(value))
 		mu.Unlock()
-	}, "fast")
+	}, "con")
 
 	iter.Apply(numbers)
 
