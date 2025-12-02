@@ -11,7 +11,7 @@ func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
-// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guarenteed.
+// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guaranteed.
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.

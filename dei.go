@@ -1,6 +1,6 @@
 /*
 	REMEMBER:
-		Keep the methods in alphabetical order with Apply() at the bottom.
+		Keep the methods in alphabetical order with Apply() & String() at the bottom.
 		This applies to the switch in Apply() as well. Keep them in order.
 */
 
@@ -41,7 +41,7 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
-// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guarenteed.
+// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guaranteed.
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	iter.foreachers = append(iter.foreachers, in)
 	iter.orders = append(iter.orders, order{
@@ -82,8 +82,6 @@ func (iter *Dei[T]) Take(n int) {
 		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
-
-
 
 // Interpret orders on data. Return new slice.
 func (iter *Dei[T]) Apply(input []T) []T {
