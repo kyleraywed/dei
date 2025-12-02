@@ -22,10 +22,21 @@ type order struct {
 type Dei[T any] struct {
 	filters    []func(t T) bool
 	mappers    []func(t T) T
+	foreachers []func(t T)
+
 	takeCounts []int
 	skipCounts []int
 
 	orders []order
+}
+
+// Perform logic using each element as an input. No changes to the underlying elements are made.
+// Set the first optional comment to "fast" if ordering isn't important.
+func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
+	iter.foreachers = append(iter.foreachers, in)
+	iter.orders = append(iter.orders, order{
+		method: "foreach", index: len(iter.foreachers) - 1, comments: comments,
+	})
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
@@ -124,6 +135,17 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			}
 
 			workingSlice = tempSlice
+
+		case "foreach":
+			workOrder := iter.foreachers[order.index]
+
+			if len(order.comments) > 0 && order.comments[0] == "fast" {
+				// concurrency goes here.
+			} else {
+				for _, val := range workingSlice {
+					workOrder(val)
+				}
+			}
 
 		case "map":
 			workOrder := iter.mappers[order.index]

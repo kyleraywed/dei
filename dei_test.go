@@ -1,6 +1,7 @@
 package dei
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -84,6 +85,26 @@ func TestSkip(t *testing.T) {
 	for idx, val := range expected {
 		if gotten[idx] != val {
 			t.Errorf("Skip value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
+		}
+	}
+}
+
+func TestForeach(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	var iter Dei[int]
+
+	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+	var gotten []string
+
+	iter.Foreach(func(value int) {
+		gotten = append(gotten, strconv.Itoa(value))
+	})
+
+	iter.Apply(numbers)
+
+	for idx, val := range expected {
+		if gotten[idx] != val {
+			t.Errorf("Foreach value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
 		}
 	}
 }
