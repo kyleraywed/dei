@@ -8,8 +8,8 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
-// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guaranteed.
-// This is to also say, the order in which the funcs are evaluated is non-deterministic. Be careful.
+// Concurrent execution will be slower for most use-cases, while the order in which the funcs are
+// evaluated is non-deterministic. Be careful when using "con".
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
 
 // Transform each element by applying a function. Optional comment strings.
