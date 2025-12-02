@@ -32,7 +32,7 @@ type Dei[T any] struct {
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "fast" for concurrent execution of input functions.
-// Not super safe.
+// Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guarenteed.
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	iter.foreachers = append(iter.foreachers, in)
 	iter.orders = append(iter.orders, order{
