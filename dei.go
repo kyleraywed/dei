@@ -164,9 +164,6 @@ func (iter *Dei[T]) Apply(input []T) []T {
 				continue
 			}
 
-			/* tempSlice := make([]T, 0, len(workingSlice))
-			tempSlice = workingSlice[:takeUntilIndex+1] */
-
 			workingSlice = workingSlice[:takeUntilIndex+1]
 
 		case "skip":
@@ -177,12 +174,15 @@ func (iter *Dei[T]) Apply(input []T) []T {
 				continue
 			}
 
-			tempSlice := make([]T, 0, len(workingSlice)-(skipUntilIndex-1))
+			/* tempSlice := make([]T, 0, len(workingSlice)-(skipUntilIndex-1))
 			for idx := skipUntilIndex + 1; idx < len(workingSlice); idx++ {
 				tempSlice = append(tempSlice, workingSlice[idx])
 			}
 
-			workingSlice = tempSlice
+
+
+			workingSlice = tempSlice */
+			workingSlice = workingSlice[skipUntilIndex+1:]
 
 		}
 	}
