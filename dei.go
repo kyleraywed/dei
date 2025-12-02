@@ -52,7 +52,6 @@ func (iter *Dei[T]) Take(n int) {
 	}
 
 	iter.takeCounts = append(iter.takeCounts, n)
-
 	iter.orders = append(iter.orders, order{
 		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
@@ -66,7 +65,6 @@ func (iter *Dei[T]) Skip(n int) {
 	}
 
 	iter.skipCounts = append(iter.skipCounts, n)
-
 	iter.orders = append(iter.orders, order{
 		method: "skip", index: len(iter.skipCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
@@ -76,14 +74,14 @@ func (iter *Dei[T]) Skip(n int) {
 func (iter *Dei[T]) Apply(input []T) []T {
 	workingSlice := input
 
+	numWorkers := runtime.NumCPU()
+	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
+
 	for _, order := range iter.orders {
 		switch order.method {
 
 		case "filter":
 			workOrder := iter.filters[order.index]
-			numWorkers := runtime.NumCPU()
-
-			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 			results := make([][]T, numWorkers)
 
 			var wg sync.WaitGroup
@@ -129,9 +127,6 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 		case "map":
 			workOrder := iter.mappers[order.index]
-			numWorkers := runtime.NumCPU()
-
-			chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 
 			var wg sync.WaitGroup
 			wg.Add(numWorkers)
@@ -190,6 +185,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			}
 
 			workingSlice = tempSlice
+
 		}
 	}
 
