@@ -1,6 +1,7 @@
 /*
-	todo:
-		- within Apply(), split large slices into concurrent workloads.
+	REMEMBER:
+		Keep the methods in alphabetical order with Apply() at the bottom.
+		This applies to the switch in Apply() as well. Keep them in order.
 */
 
 package dei
@@ -30,6 +31,14 @@ type Dei[T any] struct {
 	orders []order
 }
 
+// Keep only the elements where in returns true. Optional comment strings.
+func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
+	iter.filters = append(iter.filters, in)
+	iter.orders = append(iter.orders, order{
+		method: "filter", index: len(iter.filters) - 1, comments: comments,
+	})
+}
+
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guarenteed.
@@ -40,32 +49,11 @@ func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	})
 }
 
-// Keep only the elements where in returns true. Optional comment strings.
-func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string) {
-	iter.filters = append(iter.filters, in)
-	iter.orders = append(iter.orders, order{
-		method: "filter", index: len(iter.filters) - 1, comments: comments,
-	})
-}
-
 // Transform each element by applying a function. Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	iter.mappers = append(iter.mappers, in)
 	iter.orders = append(iter.orders, order{
 		method: "map", index: len(iter.mappers) - 1, comments: comments,
-	})
-}
-
-// Yield only the first n items from the iterator. Comments inferred.
-func (iter *Dei[T]) Take(n int) {
-	if n < 1 {
-		log.Printf("Take(%v): No order submitted.", n)
-		return
-	}
-
-	iter.takeCounts = append(iter.takeCounts, n)
-	iter.orders = append(iter.orders, order{
-		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
@@ -82,6 +70,21 @@ func (iter *Dei[T]) Skip(n int) {
 	})
 }
 
+// Yield only the first n items from the iterator. Comments inferred.
+func (iter *Dei[T]) Take(n int) {
+	if n < 1 {
+		log.Printf("Take(%v): No order submitted.", n)
+		return
+	}
+
+	iter.takeCounts = append(iter.takeCounts, n)
+	iter.orders = append(iter.orders, order{
+		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
+	})
+}
+
+
+
 // Interpret orders on data. Return new slice.
 func (iter *Dei[T]) Apply(input []T) []T {
 	workingSlice := input
@@ -91,7 +94,6 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 	for _, order := range iter.orders {
 		switch order.method {
-
 		case "filter":
 			workOrder := iter.filters[order.index]
 			results := make([][]T, numWorkers)
@@ -206,16 +208,6 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 			wg.Wait()
 
-		case "take":
-			takeUntilIndex := iter.takeCounts[order.index] - 1
-
-			if takeUntilIndex > len(workingSlice)-1 {
-				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
-				continue
-			}
-
-			workingSlice = workingSlice[:takeUntilIndex+1]
-
 		case "skip":
 			skipUntilIndex := iter.skipCounts[order.index] - 1
 
@@ -226,6 +218,15 @@ func (iter *Dei[T]) Apply(input []T) []T {
 
 			workingSlice = workingSlice[skipUntilIndex+1:]
 
+		case "take":
+			takeUntilIndex := iter.takeCounts[order.index] - 1
+
+			if takeUntilIndex > len(workingSlice)-1 {
+				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
+				continue
+			}
+
+			workingSlice = workingSlice[:takeUntilIndex+1]
 		}
 	}
 
