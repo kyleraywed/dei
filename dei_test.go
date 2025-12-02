@@ -1,7 +1,9 @@
 package dei
 
 import (
+	"slices"
 	"strconv"
+	"sync"
 	"testing"
 )
 
@@ -101,6 +103,36 @@ func TestForeach(t *testing.T) {
 	})
 
 	iter.Apply(numbers)
+
+	for idx, val := range expected {
+		if gotten[idx] != val {
+			t.Errorf("Foreach value mismatch.\nExpected: [%v] Got: [%v]\n", expected, gotten)
+		}
+	}
+}
+
+func TestForeachFast(t *testing.T) {
+	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	var iter Dei[int]
+
+	expected := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
+	var gotten []string
+
+	var mu sync.Mutex
+
+	iter.Foreach(func(value int) {
+		mu.Lock()
+		gotten = append(gotten, strconv.Itoa(value))
+		mu.Unlock()
+	}, "fast")
+
+	iter.Apply(numbers)
+
+	slices.SortFunc(gotten, func(a, b string) int {
+		ai, _ := strconv.Atoi(a)
+		bi, _ := strconv.Atoi(b)
+		return ai - bi
+	})
 
 	for idx, val := range expected {
 		if gotten[idx] != val {

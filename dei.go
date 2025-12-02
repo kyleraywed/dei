@@ -31,7 +31,8 @@ type Dei[T any] struct {
 }
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
-// Set the first optional comment to "fast" if ordering isn't important.
+// Set the first optional comment to "fast" for concurrent execution of input functions.
+// Not super safe.
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	iter.foreachers = append(iter.foreachers, in)
 	iter.orders = append(iter.orders, order{
@@ -140,7 +141,34 @@ func (iter *Dei[T]) Apply(input []T) []T {
 			workOrder := iter.foreachers[order.index]
 
 			if len(order.comments) > 0 && order.comments[0] == "fast" {
-				// concurrency goes here.
+				var wg sync.WaitGroup
+				wg.Add(numWorkers)
+
+				for idx := range numWorkers {
+					start := idx * chunkSize
+
+					if start >= len(workingSlice) {
+						wg.Done()
+						continue
+					}
+
+					end := start + chunkSize
+					if end > len(workingSlice) {
+						end = len(workingSlice)
+					}
+
+					chunk := workingSlice[start:end]
+
+					go func() {
+						defer wg.Done()
+
+						for _, v := range chunk {
+							workOrder(v)
+						}
+					}()
+				}
+
+				wg.Wait()
 			} else {
 				for _, val := range workingSlice {
 					workOrder(val)
