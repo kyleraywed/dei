@@ -6,13 +6,13 @@ A bare-bones **d**eferred-**e**xecution **i**terator library.
 // Keep only the elements where in returns true. Optional comment strings.
 func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
 
-// Transform each element by applying a function. Optional comment strings.
-func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
-
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Non-concurrent will be faster for most use-cases, and safety outside of the lib isn't guaranteed.
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
+
+// Transform each element by applying a function. Optional comment strings.
+func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.
 func (iter *Dei[T]) Skip(n int)
