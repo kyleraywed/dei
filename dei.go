@@ -51,8 +51,8 @@ func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	})
 }
 
-// Transform each element by applying a function. Unlike other iterators, flattening
-// is implicit as each edit is made directly to the data on Apply(). Optional comment strings.
+// Transform each element by applying a function. Flattening is implicit as each edit is made
+// directly to a clone of input on Apply(). Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	iter.mappers = append(iter.mappers, in)
 	iter.orders = append(iter.orders, order{

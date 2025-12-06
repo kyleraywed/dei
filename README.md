@@ -12,7 +12,8 @@ func (iter *Dei[T]) Filter(in func(value T) bool, comments ...string)
 // evaluated is non-deterministic. Be careful when using "con".
 func (iter *Dei[T]) Foreach(in func(value T), comments ...string)
 
-// Transform each element by applying a function. Optional comment strings.
+// Transform each element by applying a function. Flattening is implicit as each edit is made 
+// directly to a clone of input on Apply(). Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.
