@@ -8,7 +8,7 @@ import (
 	"github.com/kyleraywed/dei"
 )
 
-const size = 100
+const size = 1024 * 1024 * 100
 
 func main() {
 	fmt.Printf("Size: %v bytes\n\n", size)
@@ -44,8 +44,6 @@ func main() {
 		return true
 	})
 
-	x := iter.Apply(numbers)
+	_ = iter.Apply(numbers)
 	fmt.Printf("Finished in %v\n", time.Since(start))
-
-	fmt.Println(x)
 }
