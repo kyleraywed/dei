@@ -30,6 +30,8 @@ type Dei[T any] struct {
 	skipCounts []int
 
 	orders []order
+
+	userDeepClone func(t T) T
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
@@ -87,7 +89,14 @@ func (iter *Dei[T]) Take(n int) {
 
 // Interpret orders on data. Return new slice.
 func (iter *Dei[T]) Apply(input []T) []T {
-	workingSlice := slices.Clone(input) // do not modify the input
+	workingSlice := make([]T, len(input))
+	if iter.userDeepClone != nil {
+		for i := range input {
+			workingSlice[i] = iter.userDeepClone(input[i])
+		}
+	} else {
+		workingSlice = slices.Clone(input) // shallow copy
+	}
 
 	numWorkers := runtime.NumCPU()
 	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
@@ -171,6 +180,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 				}
 
 				wg.Wait()
+
 			} else {
 				for _, val := range workingSlice {
 					workOrder(val)
@@ -231,6 +241,13 @@ func (iter *Dei[T]) Apply(input []T) []T {
 	}
 
 	return workingSlice
+}
+
+// If your element type contains any reference fields and you want to guarantee
+// that the original input is never mutated, provide a deep clone function here.
+// The clone function must return a fully independent copy of the element.
+func (iter *Dei[T]) WithDeepClone(in func(value T) T, comments ...string) {
+	iter.userDeepClone = in
 }
 
 func (iter Dei[T]) String() string {

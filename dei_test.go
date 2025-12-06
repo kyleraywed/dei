@@ -1,6 +1,7 @@
 package dei
 
 import (
+	"maps"
 	"slices"
 	"strconv"
 	"sync"
@@ -186,15 +187,60 @@ func TestOrder(t *testing.T) {
 
 	for idx, val := range expected {
 		if iter.orders[idx].method != val.adapter {
-			t.Errorf("Order adapter mismatch.\nExpected [%v] Got: [%v]\n", val.adapter, iter.orders[idx].method)
+			t.Errorf("Order adapter mismatch.\nExpected: [%v] Got: [%v]\n", val.adapter, iter.orders[idx].method)
 		}
 		if iter.orders[idx].index != val.index {
-			t.Errorf("Order index mismatch.\nExpected [%v] Got: [%v]\n", val.index, iter.orders[idx].index)
+			t.Errorf("Order index mismatch.\nExpected: [%v] Got: [%v]\n", val.index, iter.orders[idx].index)
 		}
 		if iter.orders[idx].comments[0] != val.comments[0] {
-			t.Errorf("Order comment mismatch.\nExpected [%v] Got: [%v]\n", val.comments, iter.orders[idx].comments[0])
+			t.Errorf("Order comment mismatch.\nExpected: [%v] Got: [%v]\n", val.comments, iter.orders[idx].comments[0])
 		}
 	}
 
 	//fmt.Println(iter)
+}
+
+func TestDeepClone(t *testing.T) {
+	type person struct {
+		name string
+		tags []string
+		meta map[string]int
+	}
+
+	p1 := person{
+		name: "kyle",
+		tags: []string{"x", "y", "z"},
+		meta: map[string]int{
+			"one": 1,
+		},
+	}
+
+	people := []person{p1}
+
+	var iter Dei[person]
+
+	iter.WithDeepClone(func(value person) person {
+		out := value
+		// strings are value types, no need enforce deep clone for name
+		out.tags = slices.Clone(value.tags)
+		out.meta = maps.Clone(value.meta)
+
+		return out
+	})
+
+	iter.Map(func(value person) person {
+		value.tags[0] = "CHANGED"
+		value.meta["one"] = 99
+		return value
+	})
+
+	out := iter.Apply(people)
+
+	if out[0].tags[0] != "CHANGED" {
+		t.Fatalf("Deep Clone mutation error, no change.\nExpected: [\"CHANGED\"] Got: [%v]\n", out[0].tags[0])
+	}
+
+	if people[0].meta["one"] != 1 {
+		t.Fatalf("Deep Clone mutation error, original data mutated.\nExpected: [1] Got: [%v]\n", out[0].meta["one"])
+	}
 }
