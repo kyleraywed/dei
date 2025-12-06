@@ -26,7 +26,8 @@ func (iter *Dei[T]) Apply(input []T) []T
 
 // If your element type contains any reference fields and you want to guarantee
 // that the original input is never mutated, provide a deep clone function here.
-// The clone function must return a fully independent copy of the element.
+// The clone function must return a fully independent copy of the element. By
+// default, all values, reference or not, are shallowly cloned.
 func (iter *Dei[T]) WithDeepClone(in func(value T) T, comments ...string)
 ```
 
