@@ -196,8 +196,6 @@ func TestOrder(t *testing.T) {
 			t.Errorf("Order comment mismatch.\nExpected: [%v] Got: [%v]\n", val.comments, iter.orders[idx].comments[0])
 		}
 	}
-
-	//fmt.Println(iter)
 }
 
 func TestDeepClone(t *testing.T) {
