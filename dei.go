@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"slices"
 	"strconv"
 	"sync"
 )
@@ -50,7 +51,8 @@ func (iter *Dei[T]) Foreach(in func(value T), comments ...string) {
 	})
 }
 
-// Transform each element by applying a function. Optional comment strings.
+// Transform each element by applying a function. Unlike other iterators, flattening
+// is implicit as each edit is made directly to the data on Apply(). Optional comment strings.
 func (iter *Dei[T]) Map(in func(value T) T, comments ...string) {
 	iter.mappers = append(iter.mappers, in)
 	iter.orders = append(iter.orders, order{
@@ -86,7 +88,7 @@ func (iter *Dei[T]) Take(n int) {
 
 // Interpret orders on data. Return new slice.
 func (iter *Dei[T]) Apply(input []T) []T {
-	workingSlice := input
+	workingSlice := slices.Clone(input) // do not modify the input
 
 	numWorkers := runtime.NumCPU()
 	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
