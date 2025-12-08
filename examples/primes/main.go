@@ -1,9 +1,7 @@
 package main
 
 /*
-	- Create 100 MB of random bytes.
-	- Filter the prime numbers.
-	- Report benchmark times.
+	- Benchmark the time it takes to filter the prime numbers from 100MB of random bytes.
 */
 
 import (
