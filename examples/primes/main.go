@@ -12,7 +12,7 @@ import (
 	"github.com/kyleraywed/dei"
 )
 
-const size = 1024 * 1024 * 100
+const size = 1000 * 1000 * 100
 
 func main() {
 	fmt.Printf("Size: %v bytes\n\n", size)
