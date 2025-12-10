@@ -33,11 +33,7 @@ func TestOrder(t *testing.T) {
 
 	enum.Take(3)
 
-	expected := []struct {
-		method  string
-		index    int
-		comments []string
-	}{
+	expected := []order{
 		{method: "filter", index: 0, comments: []string{"Foo"}},
 		{method: "map", index: 0, comments: []string{"Bar"}},
 		{method: "take", index: 0, comments: []string{"3"}},
