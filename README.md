@@ -12,7 +12,7 @@ func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string)
 // evaluated is non-deterministic. Be careful when using "con".
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
 
-// Transform each element by applying a function. Optional comment strings.
+// Transform each value by applying a function. Optional comment strings.
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 
 // Skip the first n items and yields the rest. Comments inferred.

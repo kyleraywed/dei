@@ -55,7 +55,7 @@ func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
 	})
 }
 
-// Transform each element by applying a function. Optional comment strings.
+// Transform each value by applying a function. Optional comment strings.
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 	pipeline.mappers = append(pipeline.mappers, in)
 	pipeline.orders = append(pipeline.orders, order{
@@ -121,7 +121,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 				}
 
 				// If the end marker runs longer than the slice, you've reached the end.
-				end := min(start + chunkSize, len(workingSlice))
+				end := min(start+chunkSize, len(workingSlice))
 
 				chunk := workingSlice[start:end]
 
@@ -168,7 +168,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 						continue
 					}
 
-					end := min(start + chunkSize, len(workingSlice))
+					end := min(start+chunkSize, len(workingSlice))
 
 					chunk := workingSlice[start:end]
 
@@ -203,7 +203,7 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 					continue
 				}
 
-				end := min(start + chunkSize, len(workingSlice))
+				end := min(start+chunkSize, len(workingSlice))
 
 				chunk := workingSlice[start:end]
 
