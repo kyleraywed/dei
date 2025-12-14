@@ -18,12 +18,14 @@ func main() {
 	fmt.Printf("Size: %v bytes\n\n", size)
 	start := time.Now()
 	fmt.Print("Allocating... ")
+
 	numbers := make([]byte, size)
 	var allocIter dei.Dei[byte]
 	allocIter.Map(func(value byte) byte {
 		return byte(rand.IntN(256))
 	})
 	numbers = allocIter.Apply(numbers)
+
 	fmt.Printf("Finished in %v\n", time.Since(start))
 
 	start = time.Now()
