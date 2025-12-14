@@ -50,6 +50,7 @@ func main() {
 		return true
 	})
 
-	_ = iter.Apply(numbers)
+	x := iter.Apply(numbers)
 	fmt.Printf("Finished in %v\n", time.Since(start))
+	fmt.Println(x)
 }
