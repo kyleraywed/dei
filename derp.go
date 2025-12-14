@@ -37,10 +37,10 @@ type Derp[T any] struct {
 }
 
 // Keep only the elements where in returns true. Optional comment strings.
-func (iter *Derp[T]) Filter(in func(value T) bool, comments ...string) {
-	iter.filters = append(iter.filters, in)
-	iter.orders = append(iter.orders, order{
-		method: "filter", index: len(iter.filters) - 1, comments: comments,
+func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
+	pipeline.filters = append(pipeline.filters, in)
+	pipeline.orders = append(pipeline.orders, order{
+		method: "filter", index: len(pipeline.filters) - 1, comments: comments,
 	})
 }
 
@@ -48,53 +48,53 @@ func (iter *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 // Set the first optional comment to "con" for concurrent execution of input functions.
 // Concurrent execution will be slower for most use-cases, while the order in which the funcs are
 // evaluated is non-deterministic. Be careful when using "con".
-func (iter *Derp[T]) Foreach(in func(value T), comments ...string) {
-	iter.foreachers = append(iter.foreachers, in)
-	iter.orders = append(iter.orders, order{
-		method: "foreach", index: len(iter.foreachers) - 1, comments: comments,
+func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
+	pipeline.foreachers = append(pipeline.foreachers, in)
+	pipeline.orders = append(pipeline.orders, order{
+		method: "foreach", index: len(pipeline.foreachers) - 1, comments: comments,
 	})
 }
 
 // Transform each element by applying a function. Optional comment strings.
-func (iter *Derp[T]) Map(in func(value T) T, comments ...string) {
-	iter.mappers = append(iter.mappers, in)
-	iter.orders = append(iter.orders, order{
-		method: "map", index: len(iter.mappers) - 1, comments: comments,
+func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
+	pipeline.mappers = append(pipeline.mappers, in)
+	pipeline.orders = append(pipeline.orders, order{
+		method: "map", index: len(pipeline.mappers) - 1, comments: comments,
 	})
 }
 
 // Skip the first n items and yields the rest. Comments inferred.
-func (iter *Derp[T]) Skip(n int) {
+func (pipeline *Derp[T]) Skip(n int) {
 	if n < 1 {
 		log.Printf("Skip(%v): No order submitted.", n)
 		return
 	}
 
-	iter.skipCounts = append(iter.skipCounts, n)
-	iter.orders = append(iter.orders, order{
-		method: "skip", index: len(iter.skipCounts) - 1, comments: []string{strconv.Itoa(n)},
+	pipeline.skipCounts = append(pipeline.skipCounts, n)
+	pipeline.orders = append(pipeline.orders, order{
+		method: "skip", index: len(pipeline.skipCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
-// Yield only the first n items from the iterator. Comments inferred.
-func (iter *Derp[T]) Take(n int) {
+// Yield only the first n items from the pipelineator. Comments inferred.
+func (pipeline *Derp[T]) Take(n int) {
 	if n < 1 {
 		log.Printf("Take(%v): No order submitted.", n)
 		return
 	}
 
-	iter.takeCounts = append(iter.takeCounts, n)
-	iter.orders = append(iter.orders, order{
-		method: "take", index: len(iter.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
+	pipeline.takeCounts = append(pipeline.takeCounts, n)
+	pipeline.orders = append(pipeline.orders, order{
+		method: "take", index: len(pipeline.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
 	})
 }
 
 // Interpret orders on data. Return new slice.
-func (iter *Derp[T]) Apply(input []T) []T {
+func (pipeline *Derp[T]) Apply(input []T) []T {
 	workingSlice := make([]T, len(input))
-	if iter.userDeepClone != nil {
+	if pipeline.userDeepClone != nil {
 		for i := range input {
-			workingSlice[i] = iter.userDeepClone(input[i])
+			workingSlice[i] = pipeline.userDeepClone(input[i])
 		}
 	} else {
 		workingSlice = slices.Clone(input) // shallow copy
@@ -103,10 +103,10 @@ func (iter *Derp[T]) Apply(input []T) []T {
 	numWorkers := runtime.GOMAXPROCS(0)
 	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 
-	for _, order := range iter.orders {
+	for _, order := range pipeline.orders {
 		switch order.method {
 		case "filter":
-			workOrder := iter.filters[order.index]
+			workOrder := pipeline.filters[order.index]
 			results := make([][]T, numWorkers)
 
 			var wg sync.WaitGroup
@@ -154,7 +154,7 @@ func (iter *Derp[T]) Apply(input []T) []T {
 			workingSlice = tempSlice
 
 		case "foreach":
-			workOrder := iter.foreachers[order.index]
+			workOrder := pipeline.foreachers[order.index]
 
 			if len(order.comments) > 0 && order.comments[0] == "con" {
 				var wg sync.WaitGroup
@@ -190,7 +190,7 @@ func (iter *Derp[T]) Apply(input []T) []T {
 			}
 
 		case "map":
-			workOrder := iter.mappers[order.index]
+			workOrder := pipeline.mappers[order.index]
 
 			var wg sync.WaitGroup
 			wg.Add(numWorkers)
@@ -218,7 +218,7 @@ func (iter *Derp[T]) Apply(input []T) []T {
 			wg.Wait()
 
 		case "skip":
-			skipUntilIndex := iter.skipCounts[order.index] - 1
+			skipUntilIndex := pipeline.skipCounts[order.index] - 1
 
 			if skipUntilIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range. skipping order...", skipUntilIndex)
@@ -228,7 +228,7 @@ func (iter *Derp[T]) Apply(input []T) []T {
 			workingSlice = workingSlice[skipUntilIndex+1:]
 
 		case "take":
-			takeUntilIndex := iter.takeCounts[order.index] - 1
+			takeUntilIndex := pipeline.takeCounts[order.index] - 1
 
 			if takeUntilIndex > len(workingSlice)-1 {
 				log.Printf("index %v out of range, skipping order...", takeUntilIndex)
@@ -246,18 +246,18 @@ func (iter *Derp[T]) Apply(input []T) []T {
 // that the original input is never mutated, provide a deep clone function here.
 // The clone function must return a fully independent copy of the element. By
 // default, all values, reference or not, are shallowly cloned.
-func (iter *Derp[T]) WithDeepClone(in func(value T) T, comments ...string) {
-	iter.userDeepClone = in
+func (pipeline *Derp[T]) WithDeepClone(in func(value T) T, comments ...string) {
+	pipeline.userDeepClone = in
 }
 
-func (iter Derp[T]) String() string {
+func (pipeline Derp[T]) String() string {
 	var out string
 
 	out += fmt.Sprintf(
-		"Deep clone implemented: %v\n", iter.userDeepClone != nil,
+		"Deep clone implemented: %v\n", pipeline.userDeepClone != nil,
 	)
 
-	for idx, val := range iter.orders {
+	for idx, val := range pipeline.orders {
 		var prettyComments string
 
 		if len(val.comments) == 0 {
