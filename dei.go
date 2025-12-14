@@ -118,10 +118,8 @@ func (iter *Dei[T]) Apply(input []T) []T {
 					continue
 				}
 
-				end := start + chunkSize
-				if end > len(workingSlice) {
-					end = len(workingSlice)
-				}
+				// If the end marker runs longer than the slice, you've reached the end.
+				end := min(start + chunkSize, len(workingSlice))
 
 				chunk := workingSlice[start:end]
 
