@@ -166,10 +166,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 						continue
 					}
 
-					end := start + chunkSize
-					if end > len(workingSlice) {
-						end = len(workingSlice)
-					}
+					end := min(start + chunkSize, len(workingSlice))
 
 					chunk := workingSlice[start:end]
 
@@ -204,10 +201,7 @@ func (iter *Dei[T]) Apply(input []T) []T {
 					continue
 				}
 
-				end := start + chunkSize
-				if end > len(workingSlice) {
-					end = len(workingSlice)
-				}
+				end := min(start + chunkSize, len(workingSlice))
 
 				chunk := workingSlice[start:end]
 
