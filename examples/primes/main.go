@@ -20,19 +20,20 @@ func main() {
 	fmt.Print("Allocating... ")
 
 	numbers := make([]byte, size)
-	var allocIter derp.Derp[byte]
-	allocIter.Map(func(value byte) byte {
+	var allocPipe derp.Derp[byte]
+	allocPipe.Map(func(value byte) byte {
 		return byte(rand.IntN(256))
 	})
-	numbers = allocIter.Apply(numbers)
+	numbers = allocPipe.Apply(numbers)
 
 	fmt.Printf("Finished in %v\n", time.Since(start))
 
 	start = time.Now()
 	fmt.Print("Processing... ")
-	var iter derp.Derp[byte]
+	// new pipeline required as running Apply doesn't consume
+	var primePipe derp.Derp[byte]
 
-	iter.Filter(func(value byte) bool {
+	primePipe.Filter(func(value byte) bool {
 		if value < 2 {
 			return false
 		}
@@ -52,6 +53,6 @@ func main() {
 		return true
 	})
 
-	_ = iter.Apply(numbers)
+	_ = primePipe.Apply(numbers)
 	fmt.Printf("Finished in %v\n", time.Since(start))
 }
