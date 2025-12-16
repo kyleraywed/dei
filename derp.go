@@ -76,7 +76,7 @@ func (pipeline *Derp[T]) Skip(n int) {
 	})
 }
 
-// Yield only the first n items from the pipelineator. Comments inferred.
+// Yield only the first n items from the pipeline. Comments inferred.
 func (pipeline *Derp[T]) Take(n int) {
 	if n < 1 {
 		log.Printf("Take(%v): No order submitted.", n)
