@@ -101,9 +101,10 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 	}
 
 	numWorkers := runtime.GOMAXPROCS(0)
+	// init chunksize
+	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 
 	for _, order := range pipeline.orders {
-		chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 		switch order.method {
 		case "filter":
 			workOrder := pipeline.filters[order.index]
@@ -152,6 +153,8 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 			}
 
 			workingSlice = tempSlice
+			// redistribute work evenly among workers after flattening
+			chunkSize = (len(workingSlice) + numWorkers - 1) / numWorkers
 
 		case "foreach":
 			workOrder := pipeline.foreachers[order.index]
