@@ -101,9 +101,9 @@ func (pipeline *Derp[T]) Apply(input []T) []T {
 	}
 
 	numWorkers := runtime.GOMAXPROCS(0)
-	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 
 	for _, order := range pipeline.orders {
+		chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
 		switch order.method {
 		case "filter":
 			workOrder := pipeline.filters[order.index]
