@@ -3,6 +3,11 @@ package derp
 // Deferred Execution Reusable data-processing Pipeline
 
 /*
+	TODO:
+		Apply() should return ([]T, error) and the logs from skip and apply should go there
+*/
+
+/*
 	REMEMBER:
 		Keep the methods in alphabetical order with Apply() & String() at the bottom.
 		This applies to the switch in Apply() as well. Keep them in order.
