@@ -15,7 +15,6 @@ package derp
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"strconv"
 	"strings"
@@ -45,7 +44,9 @@ type Derp[T any] struct {
 func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 	pipeline.filters = append(pipeline.filters, in)
 	pipeline.orders = append(pipeline.orders, order{
-		method: "filter", index: len(pipeline.filters) - 1, comments: comments,
+		method:   "filter",
+		index:    len(pipeline.filters) - 1,
+		comments: comments,
 	})
 }
 
@@ -56,7 +57,9 @@ func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
 	pipeline.foreachers = append(pipeline.foreachers, in)
 	pipeline.orders = append(pipeline.orders, order{
-		method: "foreach", index: len(pipeline.foreachers) - 1, comments: comments,
+		method:   "foreach",
+		index:    len(pipeline.foreachers) - 1,
+		comments: comments,
 	})
 }
 
@@ -64,34 +67,42 @@ func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 	pipeline.mappers = append(pipeline.mappers, in)
 	pipeline.orders = append(pipeline.orders, order{
-		method: "map", index: len(pipeline.mappers) - 1, comments: comments,
+		method:   "map",
+		index:    len(pipeline.mappers) - 1,
+		comments: comments,
 	})
 }
 
 // Skip the first n items and yields the rest. Comments inferred.
-func (pipeline *Derp[T]) Skip(n int) {
+func (pipeline *Derp[T]) Skip(n int) error {
 	if n < 1 {
-		log.Printf("Skip(%v): No order submitted.", n)
-		return
+		return fmt.Errorf("Skip(%v): No order submitted.", n)
 	}
 
 	pipeline.skipCounts = append(pipeline.skipCounts, n)
 	pipeline.orders = append(pipeline.orders, order{
-		method: "skip", index: len(pipeline.skipCounts) - 1, comments: []string{strconv.Itoa(n)},
+		method:   "skip",
+		index:    len(pipeline.skipCounts) - 1,
+		comments: []string{strconv.Itoa(n)},
 	})
+
+	return nil
 }
 
 // Yield only the first n items from the pipeline. Comments inferred.
-func (pipeline *Derp[T]) Take(n int) {
+func (pipeline *Derp[T]) Take(n int) error {
 	if n < 1 {
-		log.Printf("Take(%v): No order submitted.", n)
-		return
+		return fmt.Errorf("Take(%v): No order submitted.", n)
 	}
 
 	pipeline.takeCounts = append(pipeline.takeCounts, n)
 	pipeline.orders = append(pipeline.orders, order{
-		method: "take", index: len(pipeline.takeCounts) - 1, comments: []string{strconv.Itoa(n)},
+		method:   "take",
+		index:    len(pipeline.takeCounts) - 1,
+		comments: []string{strconv.Itoa(n)},
 	})
+
+	return nil
 }
 
 // Interpret orders on data. Return new slice.

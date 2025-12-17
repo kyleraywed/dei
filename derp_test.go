@@ -1,6 +1,7 @@
 package derp
 
 import (
+	"log"
 	"slices"
 	"strconv"
 	"sync"
@@ -115,7 +116,9 @@ func TestTake(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	var halfPipe Derp[int]
 
-	halfPipe.Take(5)
+	if err := halfPipe.Take(5); err != nil {
+		log.Println(err)
+	}
 
 	expected := []int{1, 2, 3, 4, 5}
 	gotten, err := halfPipe.Apply(numbers)
@@ -146,7 +149,9 @@ func TestSkip(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	var halfPipe Derp[int]
 
-	halfPipe.Skip(5)
+	if err := halfPipe.Skip(5); err != nil {
+		log.Println(err)
+	}
 
 	expected := []int{6, 7, 8, 9, 10}
 	gotten, err := halfPipe.Apply(numbers)
