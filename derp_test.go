@@ -174,6 +174,7 @@ func TestSkip(t *testing.T) {
 	}
 }
 
+// Testing is the only reason for writing code like this.
 func TestForeach(t *testing.T) {
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	var pipe Derp[int]
@@ -203,7 +204,7 @@ func TestForeachFast(t *testing.T) {
 
 	var mu sync.Mutex
 
-	pipe.Foreach(func(value int) { // Don't do this in production, kids.
+	pipe.Foreach(func(value int) { // Again, don't do this in production.
 		mu.Lock()
 		gotten = append(gotten, strconv.Itoa(value))
 		mu.Unlock()
