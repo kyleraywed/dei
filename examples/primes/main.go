@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand/v2"
 	"time"
 
@@ -24,7 +25,10 @@ func main() {
 	allocPipe.Map(func(value byte) byte {
 		return byte(rand.IntN(256))
 	})
-	numbers, _ = allocPipe.Apply(numbers)
+	numbers, err := allocPipe.Apply(numbers)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Printf("Finished in %v\n", time.Since(start))
 
@@ -53,6 +57,9 @@ func main() {
 		return true
 	})
 
-	_, _ = primePipe.Apply(numbers)
+	_, err = primePipe.Apply(numbers)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("Finished in %v\n", time.Since(start))
 }
