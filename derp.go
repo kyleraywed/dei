@@ -96,11 +96,11 @@ func (pipeline *Derp[T]) Take(n int) error {
 // Interpret orders on data. Return new slice.
 //
 // Options:
-//   - "slow" : for deep-cloning pointer cycles eg. doubly-linked lists. Implements clone.Slowly().
+//   - "dpc" : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	workingSlice := make([]T, len(input))
-	if len(options) > 0 && slices.Contains(options, "slow") {
+	if len(options) > 0 && slices.Contains(options, "dpc") {
 		workingSlice = clone.Slowly(input) // for pointer cycles
 	} else {
 		workingSlice = clone.Clone(input) // regular deep clone by default
