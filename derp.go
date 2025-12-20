@@ -42,9 +42,7 @@ func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 }
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
-// Include "con" in comments for concurrent execution of input functions.
-// Concurrent execution will be slower for most use-cases, while the order in which the funcs are
-// evaluated is non-deterministic. Be careful when using "con".
+// Optional comment strings.
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
 	pipeline.foreachers = append(pipeline.foreachers, in)
 	pipeline.orders = append(pipeline.orders, order{
@@ -64,7 +62,7 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 	})
 }
 
-// Skip the first n items and yields the rest. Comments inferred.
+// Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Derp[T]) Skip(n int) error {
 	if n < 1 {
 		return fmt.Errorf("Skip(%v): No order submitted.", n)
@@ -80,7 +78,7 @@ func (pipeline *Derp[T]) Skip(n int) error {
 	return nil
 }
 
-// Yield only the first n items from the pipeline. Comments inferred.
+// Yield only the first n items from the pipeline. Comment inferred.
 func (pipeline *Derp[T]) Take(n int) error {
 	if n < 1 {
 		return fmt.Errorf("Take(%v): No order submitted.", n)
@@ -99,11 +97,12 @@ func (pipeline *Derp[T]) Take(n int) error {
 // Interpret orders on data. Return new slice.
 //
 // Options:
-//   - "slow" : Deep-cloning option used when input contains pointer cycles. Implements clone.Slowly()
+//   - "slow" : deep-cloning option used when input contains pointer cycles eg. doubly-linked lists. Implements clone.Slowly().
+//   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	workingSlice := make([]T, len(input))
 	if len(options) > 0 && slices.Contains(options, "slow") {
-		log.Println("Using clone.Slowly()")
+		log.Println("using opt: \"slow\"")
 		workingSlice = clone.Slowly(input) // for pointer cycles
 	} else {
 		workingSlice = clone.Clone(input) // regular deep clone by default
@@ -166,7 +165,8 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 		case "foreach":
 			workOrder := pipeline.foreachers[order.index]
 
-			if len(order.comments) > 0 && slices.Contains(order.comments, "con") {
+			if len(options) > 0 && slices.Contains(options, "cfe") {
+				log.Println("using opt: \"cfe\"")
 				var wg sync.WaitGroup
 				wg.Add(numWorkers)
 
