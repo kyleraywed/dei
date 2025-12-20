@@ -348,6 +348,6 @@ Node 10: prev=9, next=nil`
 	gotten := printList(cloned)
 
 	if strings.Trim(expected, "\n") != strings.Trim(gotten, "\n") {
-		t.Errorf("BUG")
+		t.Errorf("TestDeepClonePointerCycle(); failed deep-cloning pointer cycle")
 	}
 }
