@@ -7,7 +7,7 @@ A concurrency-driven, **d**eferred-**e**xecution, **r**eusable, data-processing 
 func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string)
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
-// Set any optional comment to "con" for concurrent execution of input functions.
+// Include "con" in comments for concurrent execution of input functions.
 // Concurrent execution will be slower for most use-cases, while the order in which the funcs are
 // evaluated is non-deterministic. Be careful when using "con".
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
