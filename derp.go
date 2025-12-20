@@ -20,9 +20,9 @@ type order struct {
 }
 
 type Derp[T any] struct {
-	filters    []func(t T) bool
-	mappers    []func(t T) T
-	foreachers []func(t T)
+	filterInstructs  []func(t T) bool
+	mapInstructs     []func(t T) T
+	foreachInstructs []func(t T)
 
 	takeCounts []int
 	skipCounts []int
@@ -32,10 +32,10 @@ type Derp[T any] struct {
 
 // Keep only the elements where in returns true. Optional comment strings.
 func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
-	pipeline.filters = append(pipeline.filters, in)
+	pipeline.filterInstructs = append(pipeline.filterInstructs, in)
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "filter",
-		index:    len(pipeline.filters) - 1,
+		index:    len(pipeline.filterInstructs) - 1,
 		comments: comments,
 	})
 }
@@ -43,20 +43,20 @@ func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string) {
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Optional comment strings.
 func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string) {
-	pipeline.foreachers = append(pipeline.foreachers, in)
+	pipeline.foreachInstructs = append(pipeline.foreachInstructs, in)
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "foreach",
-		index:    len(pipeline.foreachers) - 1,
+		index:    len(pipeline.foreachInstructs) - 1,
 		comments: comments,
 	})
 }
 
 // Transform each value by applying a function. Optional comment strings.
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
-	pipeline.mappers = append(pipeline.mappers, in)
+	pipeline.mapInstructs = append(pipeline.mapInstructs, in)
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "map",
-		index:    len(pipeline.mappers) - 1,
+		index:    len(pipeline.mapInstructs) - 1,
 		comments: comments,
 	})
 }
@@ -113,7 +113,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	for _, order := range pipeline.orders {
 		switch order.method {
 		case "filter":
-			workOrder := pipeline.filters[order.index]
+			workOrder := pipeline.filterInstructs[order.index]
 			results := make([][]T, numWorkers)
 
 			var wg sync.WaitGroup
@@ -161,7 +161,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 			workingSlice = tempSlice
 
 		case "foreach":
-			workOrder := pipeline.foreachers[order.index]
+			workOrder := pipeline.foreachInstructs[order.index]
 
 			if len(options) > 0 && slices.Contains(options, "cfe") {
 				var wg sync.WaitGroup
@@ -197,7 +197,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 			}
 
 		case "map":
-			workOrder := pipeline.mappers[order.index]
+			workOrder := pipeline.mapInstructs[order.index]
 
 			var wg sync.WaitGroup
 			wg.Add(numWorkers)
