@@ -2,6 +2,12 @@ package derp
 
 // Deferred Execution Reusable data-processing Pipeline
 
+/*
+	Todo:
+		- Add option to Apply() that allows cpu throttling by percent.
+		Right now, long-running operations just churn cycles and raise temps.
+*/
+
 import (
 	"fmt"
 	"runtime"
