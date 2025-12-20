@@ -4,7 +4,6 @@ package derp
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 	"slices"
 	"strconv"
