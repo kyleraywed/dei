@@ -43,7 +43,7 @@ func main() {
     // Create a new instruction pipeline for the type of data being processed.
     var pipeline derp.Derp[int]
 
-    // Instruct methods occur in the order in which they are declared upon calling Apply()
+    // Instruct methods are called upon in the order in which they are declared upon calling Apply()
     // So this would happen first.
     pipeline.Filter(func(value int) bool {
         return value % 2 == 0
