@@ -163,7 +163,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	}
 
 	//log.Printf("Running at %v%% power", throttleMult*100)
-	numWorkers := max(int(math.Round(float64(runtime.GOMAXPROCS(0))*throttleMult)), 1)
+	numWorkers := int(math.Ceil(float64(runtime.GOMAXPROCS(0)) * throttleMult))
 
 	// init chunksize
 	chunkSize := (len(workingSlice) + numWorkers - 1) / numWorkers
