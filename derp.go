@@ -125,6 +125,17 @@ func (pipeline *Derp[T]) Take(n int) error {
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
+	// Put reduce order at the bottom of the list
+	if len(pipeline.reduceInstructs) > 0 {
+		for idx, ord := range pipeline.orders {
+			if ord.method == "reduce" {
+				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...) // remove it where it is
+				pipeline.orders = append(pipeline.orders, ord)                              // put it on the end
+				break
+			}
+		}
+	}
+
 	workingSlice := make([]T, len(input))
 	if len(options) > 0 && slices.Contains(options, "dpc") {
 		workingSlice = clone.Slowly(input) // for pointer cycles
@@ -172,7 +183,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 				chunk := workingSlice[start:end]
 
-				go func() {
+				go func(idx int) {
 					defer wg.Done()
 
 					out := make([]T, 0, len(chunk))
@@ -182,7 +193,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 						}
 					}
 					results[idx] = out
-				}()
+				}(idx)
 			}
 
 			wg.Wait()
@@ -265,8 +276,19 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 			wg.Wait()
 
-		case "reduce":
-			// work goes here.
+		case "reduce": // reduce will always be the last order.
+			workOrder := pipeline.reduceInstructs[order.index]
+
+			if len(workingSlice) == 0 {
+				return nil, fmt.Errorf("Apply(); reduce on empty slice")
+			}
+
+			acc := workingSlice[0]
+			for _, v := range workingSlice[1:] {
+				acc = workOrder(acc, v)
+			}
+
+			workingSlice = []T{acc}
 
 		case "skip":
 			skipUntilIndex := pipeline.skipCounts[order.index]
