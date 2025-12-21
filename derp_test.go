@@ -20,14 +20,14 @@ func TestReducePromise(t *testing.T) {
 	})
 
 	if _, ok := promise.Get(); ok {
-		t.Error("promise expected to be nil")
+		t.Error("TestReducePromise(); promise expected to be nil")
 	}
 
 	pipe.Apply(numbers)
 
 	if val, ok := promise.Get(); ok {
 		if val != 55 {
-			t.Errorf("TestReduceReturn()")
+			t.Errorf("TestReduceReturn(); promise expected to be fulfilled")
 		}
 	}
 }
