@@ -21,8 +21,9 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 // Only one Reduce can be set per pipeline. It is automatically executed last
 // regardless of the order in which it was added.
 //
-// Returns a slice containing a single value: the final accumulator.
-func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error
+// Returns a promise and an error. When Apply() is run, Apply()'s output will be a []T with length 1.
+// The promise is fulfilled and promise.Get() will point to a single T value. Nil if unfulfilled.
+func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (*promise.Promise[T], error)
 
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Derp[T]) Skip(n int) error
@@ -72,9 +73,11 @@ func main() {
     })
 
     // Fourth? NO! Reduce will ALWAYS be the LAST thing to run, it can only be declared
-    // one time or it returns an error, and it returns a slice of a single element.
-    // Apply() will error if the working slice is empty when the reduce order is given.
-    err := pipeline.Reduce(func(acc int, value int) int {
+    // one time or it returns an error. Returns a promise and an error. Before Apply(),
+    // promise.Get() returns nil. On Apply(), the promise is fulfilled, and promise.Get()
+    // will return a value. Alternatively, Apply() will return a length 1 slice of T with
+    // the same value.
+    _, err := pipeline.Reduce(func(acc int, value int) int {
         return acc + value
     })
     if err != nil {
@@ -110,3 +113,4 @@ Notes and design
 -
 - Deep cloning is handled via [go-clone](https://github.com/huandu/go-clone).
 - Derp is **not** safe for concurrent use.
+- Promise[T]
