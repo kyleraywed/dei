@@ -13,6 +13,17 @@ func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
 // Transform each value by applying a function. Optional comment strings.
 func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 
+// Reduce sets a terminal operation that aggregates all elements of the pipeline into a single value.
+//
+// The provided function `in` is called with an accumulator and each element of the slice,
+// in order. The result of each call becomes the new accumulator for the next element.
+//
+// Only one Reduce can be set per pipeline. It is automatically executed last
+// regardless of the order in which it was added.
+//
+// Returns a slice containing a single value: the final accumulator.
+func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error
+
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Derp[T]) Skip(n int) error
 
@@ -60,13 +71,23 @@ func main() {
         return value > 10
     })
 
+    // Fourth? NO! Reduce will ALWAYS be the LAST thing to run, it can only be declared
+    // one time or it returns an error, and it returns a slice of a single element.
+    // Apply() will error when reduce is applied on an empty slice.
+    err := pipeline.Reduce(func(acc int, value int) int {
+        return acc + value
+    })
+    if err != nil {
+        log.Fatal(err) 
+    }
+
     // Fourth. 
     pipeline.Foreach(func(value int) { // print the values
         fmt.Println(value)
     })
 
-    // Last. Take and skip still log inferred comments.
-    if err := pipeline.Take(2); err != nil {
+    // Fifth. Take and skip still log inferred comments.
+    if err = pipeline.Take(2); err != nil {
         log.Println(err)
     } // get just the first 2 elements
 
