@@ -125,7 +125,7 @@ func (pipeline *Derp[T]) Take(n int) error {
 //   - "cfe" : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
-	// Put reduce order at the bottom of the list
+	// Ensure reduce is the last instruction in the orders
 	if len(pipeline.reduceInstructs) > 0 {
 		for idx, ord := range pipeline.orders {
 			if ord.method == "reduce" {
@@ -276,7 +276,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 
 			wg.Wait()
 
-		case "reduce": // reduce will always be the last order.
+		case "reduce":
 			workOrder := pipeline.reduceInstructs[order.index]
 
 			if len(workingSlice) == 0 {
