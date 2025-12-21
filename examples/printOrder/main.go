@@ -17,23 +17,19 @@ func main() {
 		return value%2 == 0
 	}, "Get just evens")
 
-	enum.Map(func(value byte) byte {
-		return value / 2
-	}, "Half the value")
+	enum.Reduce(func(acc, value byte) byte {
+		return acc + value
+	}, "The reduce order is moved to the last order at Apply().", "This is the only method with a side-effect.")
 
 	enum.Skip(2)
-
-	enum.Take(2)
-
-	// No comment, empty slice
-	enum.Foreach(func(value byte) {
-		fmt.Println(value)
-	}, "Print the values")
 
 	// Notice the index for this Map will be 1 since it's the second time Map is called.
 	enum.Map(func(value byte) byte {
 		return value + 1
 	}, "Increment value", "Check the index")
 
+	fmt.Println(enum)
+	fmt.Println("--------------------------------")
+	enum.Apply([]byte{})
 	fmt.Println(enum)
 }

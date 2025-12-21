@@ -31,7 +31,7 @@ type Derp[T any] struct {
 	filterInstructs  []func(t T) bool
 	mapInstructs     []func(t T) T
 	foreachInstructs []func(t T)
-	reduceInstructs  []func(a T, v T) T
+	reduceInstruct   func(a T, v T) T
 
 	takeCounts []int
 	skipCounts []int
@@ -80,14 +80,13 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string) {
 //
 // Returns a slice containing a single value: the final accumulator.
 func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error {
-	if len(pipeline.reduceInstructs) > 0 {
+	// reduceInstructs
+	if pipeline.reduceInstruct != nil {
 		return fmt.Errorf("Reduce has already been set.")
 	}
-
-	pipeline.reduceInstructs = append(pipeline.reduceInstructs, in)
+	pipeline.reduceInstruct = in
 	pipeline.orders = append(pipeline.orders, order{
 		method:   "reduce",
-		index:    len(pipeline.reduceInstructs) - 1,
 		comments: comments,
 	})
 
@@ -134,7 +133,7 @@ func (pipeline *Derp[T]) Take(n int) error {
 //   - "power-[25, 50, 75]"; throttle cpu usage to 25, 50, or 75%. Default is 100%.
 func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 	// Ensure reduce is the last instruction in the orders
-	if len(pipeline.reduceInstructs) > 0 && pipeline.orders[len(pipeline.orders)-1].method != "reduce" {
+	if pipeline.reduceInstruct != nil && pipeline.orders[len(pipeline.orders)-1].method != "reduce" {
 		for idx, ord := range pipeline.orders {
 			if ord.method == "reduce" {
 				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...) // remove it where it is
@@ -285,7 +284,7 @@ func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error) {
 			wg.Wait()
 
 		case "reduce":
-			workOrder := pipeline.reduceInstructs[order.index]
+			workOrder := pipeline.reduceInstruct
 
 			if len(workingSlice) == 0 {
 				return nil, fmt.Errorf("Apply(); reduce on empty slice")
