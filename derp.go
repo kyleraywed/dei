@@ -158,21 +158,6 @@ func (pipeline *Derp[T]) Take(n int) error {
 	return nil
 }
 
-func hasMultipleOpts(in []Option, targets ...Option) bool {
-	count := 0
-
-	for _, val := range targets {
-		if slices.Contains(in, val) {
-			count++
-		}
-		if count >= 2 {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Interpret orders on data. Return new slice.
 // Non-pointer-cycle-safe deep-cloning by default.
 //
@@ -398,4 +383,19 @@ func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) {
 	}
 
 	return workingSlice, nil
+}
+
+func hasMultipleOpts(in []Option, targets ...Option) bool {
+	count := 0
+
+	for _, val := range targets {
+		if slices.Contains(in, val) {
+			count++
+		}
+		if count >= 2 {
+			return true
+		}
+	}
+
+	return false
 }
