@@ -34,11 +34,11 @@ func (pipeline *Derp[T]) Take(n int) error
 // Non-pointer-cycle-safe deep-cloning by default.
 //
 // Options:
-//   - NoCopyOpt : operate directly on the input backing array. Can mutate reference types. Default for value types.
-//   - CloneOpt : deep-clone non pointer-cyclic data. Default for reference types and structs.
-//   - DpcOpt : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
-//   - CfeOpt : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
-//   - Power25Opt, Power50Opt, Power75Opt; throttle cpu usage to 25, 50, or 75%. Default is 100%.
+//   - Opt_NoCopy : operate directly on the input backing array. Expect mutations on reference types. Default for value types.
+//   - Opt_Clone : deep-clone non pointer cycle data. Default for reference types and structs.
+//   - Opt_Dpc : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
+//   - Opt_Cfe : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
+//   - Opt_Power25, Opt_Power50, Opt_Power75; throttle cpu usage to 25, 50, or 75%. Default is 100%.
 func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) 
 ```
 
