@@ -4,14 +4,14 @@ A concurrency-driven, **d**eferred-**e**xecution, **r**eusable, data-processing 
 
 ```go
 // Keep only the elements where in returns true. Optional comment strings.
-func (pipeline *Derp[T]) Filter(in func(value T) bool, comments ...string)
+func (pipeline *Pipeline[T]) Filter(in func(value T) bool, comments ...string)
 
 // Perform logic using each element as an input. No changes to the underlying elements are made.
 // Optional comment strings.
-func (pipeline *Derp[T]) Foreach(in func(value T), comments ...string)
+func (pipeline *Pipeline[T]) Foreach(in func(value T), comments ...string)
 
 // Transform each value by applying a function. Optional comment strings.
-func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
+func (pipeline *Pipeline[T]) Map(in func(value T) T, comments ...string)
 
 // Reduce sets a terminal operation that aggregates all elements of the pipeline into a single value.
 //
@@ -22,13 +22,13 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 // regardless of the order in which it was added.
 //
 // When Apply() is run, Apply()'s output will be a []T with a single element.
-func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error
+func (pipeline *Pipeline[T]) Reduce(in func(acc T, value T) T, comments ...string) error
 
 // Skip the first n items and yield the rest. Comment inferred.
-func (pipeline *Derp[T]) Skip(n int) error
+func (pipeline *Pipeline[T]) Skip(n int) error
 
 // Yield only the first n items. Comment inferred.
-func (pipeline *Derp[T]) Take(n int) error
+func (pipeline *Pipeline[T]) Take(n int) error
 
 // Interpret orders on data. Return new slice.
 // Non-pointer-cycle-safe deep-cloning by default.
@@ -39,7 +39,7 @@ func (pipeline *Derp[T]) Take(n int) error
 //   - Opt_Dpc : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - Opt_Cfe : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - Opt_Power25, Opt_Power50, Opt_Power75 : throttle cpu usage to 25, 50, or 75%. Default is 100%.
-func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) 
+func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) 
 ```
 
 Usage
@@ -55,7 +55,7 @@ import (
 
 func main() {
     // Create a new instruction pipeline for the type of data being processed.
-    var pipeline derp.Derp[int]
+    var pipeline derp.Pipeline[int]
 
     // Upon calling Apply(), orders are fulfilled in the order in which they are declared.
     // So this would happen first.
