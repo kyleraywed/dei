@@ -21,8 +21,7 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 // Only one Reduce can be set per pipeline. It is automatically executed last
 // regardless of the order in which it was added.
 //
-// Returns a promise and an error. When Apply() is run, Apply()'s output will be a []T with a single element
-// The promise is fulfilled and promise.Get() will point to the same T value. Nil if unfulfilled.
+// When Apply() is run, Apply()'s output will be a []T with a single elelment.
 func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (*promise.Promise[T], error)
 
 // Skip the first n items and yield the rest. Comment inferred.
@@ -73,11 +72,9 @@ func main() {
     })
 
     // Fourth? NO! Reduce will ALWAYS be the LAST thing to run, it can only be declared
-    // one time or it returns an error. Returns a promise and an error. Before Apply(),
-    // promise.Get() returns nil. On Apply(), the promise is fulfilled, and promise.Get()
-    // will return a value. Alternatively, Apply() will return a length 1 slice of T with
+    // one time or it returns an error. Apply() will return a length 1 slice of T with
     // the same value.
-    _, err := pipeline.Reduce(func(acc int, value int) int {
+    err := pipeline.Reduce(func(acc int, value int) int {
         return acc + value
     })
     if err != nil {
