@@ -21,8 +21,8 @@ func (pipeline *Derp[T]) Map(in func(value T) T, comments ...string)
 // Only one Reduce can be set per pipeline. It is automatically executed last
 // regardless of the order in which it was added.
 //
-// When Apply() is run, Apply()'s output will be a []T with a single elelment.
-func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) (*promise.Promise[T], error)
+// When Apply() is run, Apply()'s output will be a []T with a single element.
+func (pipeline *Derp[T]) Reduce(in func(acc T, value T) T, comments ...string) error
 
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Derp[T]) Skip(n int) error
@@ -34,12 +34,12 @@ func (pipeline *Derp[T]) Take(n int) error
 // Non-pointer-cycle-safe deep-cloning by default.
 //
 // Options:
-//   - NoCopyOpt : operate directly on input backing array. Fast. Mutations on reference types. Default for value types.
+//   - NoCopyOpt : operate directly on the input backing array. Expect mutations on reference types. Default for value types.
 //   - CloneOpt : deep-clone non pointer cycle data. Default for reference types and structs.
 //   - DpcOpt : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - CfeOpt : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - Power25Opt, Power50Opt, Power75Opt; throttle cpu usage to 25, 50, or 75%. Default is 100%.
-func (pipeline *Derp[T]) Apply(input []T, options ...string) ([]T, error)
+func (pipeline *Derp[T]) Apply(input []T, options ...Option) ([]T, error) 
 ```
 
 Usage
@@ -113,4 +113,3 @@ Notes and design
 -
 - Deep cloning is handled via [go-clone](https://github.com/huandu/go-clone).
 - Derp is **not** safe for concurrent use.
-- Promise[T]
