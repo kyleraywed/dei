@@ -96,7 +96,7 @@ func main() {
 
     numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
     // Apply() performs the actual work orders declared above.
-    // Input is implicitly deep-cloned and won't see side-effects.
+    // Reference types and structures are default deep-cloned, value types are shallow copied.
     // The pipeline does not consume, and is safely reusable.
     output, err := pipeline.Apply(numbers)
     if err != nil {
