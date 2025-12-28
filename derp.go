@@ -42,11 +42,12 @@ type order struct {
 
 type Pipeline[T any] struct {
 	filterInstructs  []func(t T) bool
-	mapInstructs     []func(t T) T
 	foreachInstructs []func(t T)
+	mapInstructs     []func(t T) T
 	reduceInstruct   func(a T, v T) T
-	takeCounts       []int
 	skipCounts       []int
+	takeCounts       []int
+	doReset          bool
 
 	orders []order
 }
@@ -126,6 +127,20 @@ func (pipeline *Pipeline[T]) Reduce(in func(acc T, value T) T, comments ...strin
 	return nil
 }
 
+func (pipeline *Pipeline[T]) Reset(comments ...string) error {
+	if pipeline.doReset {
+		return fmt.Errorf("Reset has already been set")
+	}
+
+	pipeline.doReset = true
+	pipeline.orders = append(pipeline.orders, order{
+		method:   "reset",
+		comments: comments,
+	})
+
+	return nil
+}
+
 // Skip the first n items and yield the rest. Comment inferred.
 func (pipeline *Pipeline[T]) Skip(n int) error {
 	if n < 1 {
@@ -166,18 +181,28 @@ func (pipeline *Pipeline[T]) Take(n int) error {
 //   - Opt_DPC : "(d)eep-clone (p)ointer (c)ycles"; eg. doubly-linked lists. Implements clone.Slowly().
 //   - Opt_CFE : "(c)oncurrent (f)or(e)ach"; function eval order is non-deterministic. Use with caution.
 //   - Opt_Power25, Opt_Power50, Opt_Power75 : throttle cpu usage to 25, 50, or 75%. Default is 100%.
+//   - Opt_Reset : Clear pipeline instructions after Apply()
 func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 	if len(input) < 1 {
 		var zero []T
 		return zero, fmt.Errorf("empty input slice")
 	}
 
-	// Ensure reduce is the last instruction in the orders
+	// Reduce and reset should be the last two instructions, in that order.
 	if pipeline.reduceInstruct != nil && pipeline.orders[len(pipeline.orders)-1].method != "reduce" {
 		for idx, ord := range pipeline.orders {
 			if ord.method == "reduce" {
 				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...) // remove it where it is
 				pipeline.orders = append(pipeline.orders, ord)                              // put it on the end
+				break
+			}
+		}
+	}
+	if pipeline.reduceInstruct != nil && pipeline.orders[len(pipeline.orders)-1].method != "reset" {
+		for idx, ord := range pipeline.orders {
+			if ord.method == "reset" {
+				pipeline.orders = append(pipeline.orders[:idx], pipeline.orders[idx+1:]...)
+				pipeline.orders = append(pipeline.orders, ord)
 				break
 			}
 		}
@@ -363,6 +388,15 @@ func (pipeline *Pipeline[T]) Apply(input []T, options ...Option) ([]T, error) {
 			}
 
 			workingSlice = []T{acc}
+
+		case "reset":
+			pipeline.filterInstructs = nil
+			pipeline.foreachInstructs = nil
+			pipeline.mapInstructs = nil
+			pipeline.reduceInstruct = nil
+			pipeline.doReset = false
+			pipeline.skipCounts = nil
+			pipeline.takeCounts = nil
 
 		case "skip":
 			skipUntilIndex := pipeline.skipCounts[order.index]

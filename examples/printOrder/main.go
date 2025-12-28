@@ -19,7 +19,7 @@ func main() {
 
 	enum.Reduce(func(acc, value byte) byte {
 		return acc + value
-	}, "The reduce order is moved to the last order at Apply().", "This is the only instruction with a side-effect.")
+	}, "The reduce order is moved to the last order at Apply().", "This is the only instruction with a side-effect beside reset.")
 
 	enum.Skip(2)
 
